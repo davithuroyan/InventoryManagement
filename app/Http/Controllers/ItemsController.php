@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
 use App\Http\Requests;
+use App\Http\Controllers\Controller;
+use App\Item;
+use Session;
 
-class ItemsController extends Controller
-{
+class ItemsController extends Controller {
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        //
+    public function index() {
+        $items = Item::all();
+
+        return view('items.index')->withItems($items);
     }
 
     /**
@@ -23,9 +26,8 @@ class ItemsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
-        //
+    public function create() {
+        return view("items.create");
     }
 
     /**
@@ -34,9 +36,32 @@ class ItemsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        //
+    public function store(Request $request) {
+//
+//        $this->validate($request, [
+//            "item_name" => "required|max:255",
+//            "serial_number" => "required|max:255",
+//            "prie" => "required"
+//        ]);
+
+        $item = new Item();
+
+        $item->item_name = $request->item_name;
+        $item->vendor_id = $request->vendor_id;
+        $item->type_id = $request->type_id;
+        $item->serial_number = $request->serial_number;
+        $item->price = $request->price;
+        $item->weight = $request->weight;
+        $item->color = $request->color;
+        $item->release_date = $request->release_date;
+        $item->photo = $request->photo;
+        $item->tags = $request->tags;
+
+        $item->save();
+
+        Session::flash("success", "Item Successfuly saved");
+
+        return redirect()->route("items.show", $item->id);
     }
 
     /**
@@ -45,9 +70,9 @@ class ItemsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
+    public function show($id) {
+        $item = Item::find($id);
+        return view('items.show')->with("item", $item);
     }
 
     /**
@@ -56,9 +81,10 @@ class ItemsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
+    public function edit($id) {
+        $item = Item::find($id);
+
+        return view('items.edit')->withItem($item);
     }
 
     /**
@@ -68,9 +94,28 @@ class ItemsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(Request $request, $id) {
+        //        $this->validate($request, [
+//            "item_name" => "required|max:255",
+//            "serial_number" => "required|max:255",
+//            "prie" => "required"
+//        ]);
+        $item = item::find($id);
+        $item->item_name = $request->input('item_name');
+        $item->vendor_id = $request->input('vendor_id');
+        $item->type_id = $request->input('type_id');
+        $item->serial_number = $request->input('serial_number');
+        $item->price = $request->input('price');
+        $item->weight = $request->input('weight');
+        $item->color = $request->input('color');
+        $item->release_date = $request->input('release_date');
+        $item->photo = $request->input('photo');
+        $item->tags = $request->input('tags');
+        $item->save();
+        
+        Session::flash("success", "Item Successfuly updated");
+
+        return redirect()->route("items.show", $item->id);
     }
 
     /**
@@ -79,8 +124,8 @@ class ItemsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         //
     }
+
 }
