@@ -1,4 +1,4 @@
-@extends("main")
+@extends("main",["lastItems"=>$lastItems])
 
 @section("title",'| All Items')
 
@@ -20,6 +20,8 @@
 <div class='row'>
 
     <div class='col-md-12'>
+        {!! Form::model($items,['route'=>'items.index','method'=>'GET']) !!}
+
         <table class='table'>
             <thead>
                 <tr>
@@ -39,6 +41,21 @@
                 </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td></td>
+                    <td>{{Form::text('item_name',Input::get('item_name'),array('class'=>'form-control'))}}</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{Form::number('price',Input::get('price'),array('class'=>'form-control'))}}</td>
+                    <td></td>
+                    <td></td>
+                    <td>{{Form::text('color',Input::get('color'),array('class'=>'form-control'))}}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><button type="submit">Search</button></td>
+                </tr>
                 @foreach( $items as $item )
                 <tr>
                     <td>{{$item->id}}</td>
@@ -53,16 +70,24 @@
                     <td>{{$item->photo}}</td>
                     <td>{{$item->tags}}</td>
                     <td>{{$item->id}}</td>
-                    <td><a href='{{ route('items.show',$item->id) }}' class='btn btn-default'>View</a>
-                        <a href='{{ route('items.edit',$item->id) }}' class='btn btn-default'>Edit</a>
+                    <td>                        
+                        {!! Html::linkRoute('items.show','View',[$item->id],['class'=>'btn btn-default']) !!}
+                        {!! Html::linkRoute('items.edit','Edit',[$item->id],['class'=>'btn btn-default']) !!}
+                        {!!Form::open(['route'=>['items.destroy',$item->id],'method'=>'DELETE'])!!}
+                        {!!Form::submit('Delete',['class'=>'btn btn-danger btn-block'])!!}
+                        {!!Form::close()!!}
+                        <!--{!! Html::linkRoute('items.destroy','Delete',[$item->id],['class'=>'btn btn-danger btn-block']) !!}-->
                     </td>
                 </tr>
                 @endforeach
             </tbody>
         </table>
+        {{ $items->links() }}
+        {!! Form::close() !!}
     </div>
 
 </div>
+@endsection
 
 
 

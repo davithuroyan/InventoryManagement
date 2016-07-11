@@ -9,17 +9,11 @@
         <div class='container'>
 
             @section('sidebar')
-            <div class="col-xs-3">
-                <h1>Last Items</h1>
-                <hr>
-                @foreach ($lastItems as $item)
-                <p> <a href="/items/{{$item->id}}">{{ $item->item_name }}</a></p>
-                @endforeach
-            </div>
+            
             @show
 
 
-            <div class="col-xs-9">
+            <div class="col-xs-8 col-xs-offset-2">
                 @include('partials._messages')
                 @yield("content")
                 @include("partials._footer")

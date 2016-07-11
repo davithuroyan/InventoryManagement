@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
 use App\Item;
+use App\Vendor;
+use App\Type;
 use Session;
+use Input;
 
 class ItemsController extends Controller {
 
@@ -15,10 +18,25 @@ class ItemsController extends Controller {
      *
      * @return \Illuminate\Http\Response
      */
-    public function index() {
-        $items = Item::all();
+    public function index(Request $request) {
+        $this->validate($request, [
+            'price' => 'integer'
+        ]);
 
-        return view('items.index')->withItems($items);
+        $name = $request->get('item_name');
+        $price = $request->get('price');
+        $color = $request->get('color');
+        $lastItems = Item::orderBy('id', 'desc')->limit(3)->get();
+
+        $items = Item::where('item_name', 'like', "%$name%")
+                ->orWhere('price', 'like', "%$price%")
+                ->orWhere('color', 'like', "%$color%")
+                ->paginate(10)
+        ;
+
+        return view('items.index', [
+            'items' => $items->appends(Input::except('page')),
+            "lastItems" => $lastItems]);
     }
 
     /**
@@ -27,7 +45,10 @@ class ItemsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function create() {
-        return view("items.create");
+        $lastItems = Item::orderBy('id', 'desc')->limit(3)->get();
+        $vendors = Vendor::all(['id', 'name'])->pluck('name', 'id');
+        $types = Type::all(['id', 'name'])->pluck('name', 'id');
+        return view("items.create", ["lastItems" => $lastItems], compact('id', 'vendors', 'types'));
     }
 
     /**
@@ -54,8 +75,17 @@ class ItemsController extends Controller {
         $item->weight = $request->weight;
         $item->color = $request->color;
         $item->release_date = $request->release_date;
-        $item->photo = $request->photo;
+
         $item->tags = $request->tags;
+
+
+        if (isset($request->photo) && Input::file('photo')->isValid()) {
+            $destinationPath = 'uploads'; // upload path
+            $extension = Input::file('photo')->getClientOriginalExtension(); // getting image extension
+            $fileName = rand(11111, 99999) . '.' . $extension; // renameing image
+            Input::file('photo')->move($destinationPath, $fileName); // uploading file to given path
+            $item->photo = $fileName;
+        }
 
         $item->save();
 
@@ -71,8 +101,9 @@ class ItemsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show($id) {
+        $lastItems = Item::orderBy('id', 'desc')->limit(3)->get();
         $item = Item::find($id);
-        return view('items.show')->with("item", $item);
+        return view('items.show', ["lastItems" => $lastItems])->with("item", $item);
     }
 
     /**
@@ -82,9 +113,10 @@ class ItemsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit($id) {
+        $lastItems = Item::orderBy('id', 'desc')->limit(3)->get();
         $item = Item::find($id);
 
-        return view('items.edit')->withItem($item);
+        return view('items.edit', ["lastItems" => $lastItems])->withItem($item);
     }
 
     /**
@@ -95,7 +127,7 @@ class ItemsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id) {
-        //        $this->validate($request, [
+//        $this->validate($request, [
 //            "item_name" => "required|max:255",
 //            "serial_number" => "required|max:255",
 //            "prie" => "required"
@@ -112,7 +144,7 @@ class ItemsController extends Controller {
         $item->photo = $request->input('photo');
         $item->tags = $request->input('tags');
         $item->save();
-        
+
         Session::flash("success", "Item Successfuly updated");
 
         return redirect()->route("items.show", $item->id);
@@ -125,7 +157,8 @@ class ItemsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function destroy($id) {
-        //
+        $id = (int) $id;
+        DB::table('items')->where('id', '=', $id)->delete();
     }
 
 }

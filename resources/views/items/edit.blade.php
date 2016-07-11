@@ -1,4 +1,4 @@
-@extends("main")
+@extends("main",["lastItems"=>$lastItems])
 
 @section("title",'| Edit Item')
 
@@ -38,7 +38,7 @@
         {{Form::text('photo',null,array('class'=>'form-control'))}}
 
         {{Form::label('tags','Tags')}}
-        {{Form::text('tags',null,array('class'=>'form-control'))}}
+        {{Form::text('tags',null,array('class'=>'form-control',"data-role"=>"tagsinput"))}}
 
         {{Form::submit('Update Item',array('class'=>'btn btn-success btn-lg btn-block'))}}
         {!! Form::close() !!}

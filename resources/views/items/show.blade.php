@@ -1,4 +1,4 @@
-@extends('main')
+@extends('main',["lastItems"=>$lastItems])
 
 @section('title', '| View Item')
 
