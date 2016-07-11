@@ -158,7 +158,10 @@ class ItemsController extends Controller {
      */
     public function destroy($id) {
         $id = (int) $id;
-        DB::table('items')->where('id', '=', $id)->delete();
+        $item = Item::find($id);
+        $item->delete();
+        
+        return redirect()->route("items.index");
     }
 
 }
